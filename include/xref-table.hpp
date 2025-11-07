@@ -6,7 +6,7 @@
 #include <string>
 #include <iostream>
 
-struct XRefEntry {
+struct X_Ref_Entry {
     uint64_t offset;
     uint16_t generation;
     bool inUse;
