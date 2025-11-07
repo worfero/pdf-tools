@@ -1,10 +1,12 @@
 #include "parser.hpp"
 
-uint64_t find_xref_addr(std::ifstream &file){
+uint64_t Parser::find_xref_offset(std::ifstream &file){
     file.seekg(0, std::ios::end); // move the stream pointer to the end of the file
     std::streampos file_size = file.tellg(); // get the current position of the pointer as a byte size in relation to the full size
+    
     size_t read_size = std::min<size_t>(LOOKBACK, file_size); // determine the maximum read size to be the LOOKBACK directive
     std::vector<char> buffer(read_size); // declare char buffer to read the section
+    
     file.seekg(static_cast<size_t>(file_size) - read_size, std::ios::beg); // moves the pointer 4kb before the end of the file
     file.read(buffer.data(), read_size); // effectively read the last 4kb of the file
 
@@ -23,7 +25,7 @@ uint64_t find_xref_addr(std::ifstream &file){
     return XREF_OFFSET_ERROR;
 }
 
-std::vector<X_Ref_Entry> read_xref_table(std::ifstream &file, uint64_t xref_offset){
+void Parser::read_xref_table(std::ifstream &file, PDFDocument &pdf_doc, uint64_t xref_offset){
     file.seekg(xref_offset); // move the pointer to the xref offset
     std::string token;
     file >> token;
@@ -37,34 +39,32 @@ std::vector<X_Ref_Entry> read_xref_table(std::ifstream &file, uint64_t xref_offs
     for(int i = 0; i < count; i++){
         std::string offset_str, gen_str, flag;
         file >> offset_str >> gen_str >> flag;
-        xref_table[i] = {
+        X_Ref_Entry entry = {
             static_cast<uint64_t>(std::stoull(offset_str)),
             static_cast<uint16_t>(std::stoi(gen_str)),
-            flag == "n"
+            flag[0]
         };
+        pdf_doc.add_xref_entry(entry);
     }
-
-    return xref_table;
 }
 
-void parsePDF(std::string pdf){
-    std::ifstream file(pdf, std::ios::binary);
+PDFDocument Parser::parsePDF(const std::string &path){
+    std::ifstream file(path, std::ios::binary);
     if (!file) {
         throw std::runtime_error("Error: cannot open file");
     }
 
     std::cout << "File opened successfully." << "\n\n";
 
-    uint64_t xref_offset = find_xref_addr(file);
+    uint64_t xref_offset = find_xref_offset(file);
     if(xref_offset == XREF_OFFSET_ERROR){
         throw std::runtime_error("Error: xref-table address not found.");
     }
     std::cout << "xref table offset: " << xref_offset << "\n\n";
 
-    std::vector<X_Ref_Entry> xref_table = read_xref_table(file, xref_offset);
-    std::cout << "[" << "\n";
-    for(size_t i = 0; i < xref_table.size(); i++){
-        std::cout << " " << xref_table[i].offset << " " << xref_table[i].generation << " " << xref_table[i].inUse << "\n";
-    }
-    std::cout << "]" << std::endl;
+    PDFDocument pdf_doc;
+
+    read_xref_table(file, pdf_doc, xref_offset);
+
+    return pdf_doc;
 }
