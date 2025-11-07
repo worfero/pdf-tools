@@ -2,17 +2,21 @@
 #define PDF_DOCUMENT_H
 
 #include <vector>
+#include <map>
+#include <string>
 #include "pdf-objects.hpp"
 
 class PDFDocument {
 private:
-    std::vector<X_Ref_Entry> xref_table;
+    X_Ref_Table xref_table;
+    //Trailer trailer;
 
 public:
     PDFDocument() = default;
 
-    void add_xref_entry(const X_Ref_Entry &entry);
-    std::vector<X_Ref_Entry> get_xref_table();
+    // getters
+    X_Ref_Table &get_xref_table();
+    const X_Ref_Table &get_xref_table() const;
 };
 
 #endif

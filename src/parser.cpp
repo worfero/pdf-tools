@@ -22,14 +22,15 @@ uint64_t Parser::find_xref_offset(std::ifstream &file){
             }
         }
     }
-    return XREF_OFFSET_ERROR;
+    throw std::runtime_error("Error: xref-table address not found.");
 }
 
 void Parser::read_xref_table(std::ifstream &file, PDFDocument &pdf_doc, uint64_t xref_offset){
     file.seekg(xref_offset); // move the pointer to the xref offset
     std::string token;
     file >> token;
-    if(token != "xref") throw std::runtime_error("Error: xref keyword not found"); // make sure the xref table is there
+    std::cout << token << "\n";
+    if(token != "xref") throw std::runtime_error("Error: xref keyword not found."); // make sure the xref table is there
 
     int first_entry, count;
     file >> first_entry >> count; // get the first entry index and the number of entries
@@ -44,7 +45,7 @@ void Parser::read_xref_table(std::ifstream &file, PDFDocument &pdf_doc, uint64_t
             static_cast<uint16_t>(std::stoi(gen_str)),
             flag[0]
         };
-        pdf_doc.add_xref_entry(entry);
+        pdf_doc.get_xref_table().add_entry(entry);
     }
 }
 
@@ -57,9 +58,7 @@ PDFDocument Parser::parsePDF(const std::string &path){
     std::cout << "File opened successfully." << "\n\n";
 
     uint64_t xref_offset = find_xref_offset(file);
-    if(xref_offset == XREF_OFFSET_ERROR){
-        throw std::runtime_error("Error: xref-table address not found.");
-    }
+
     std::cout << "xref table offset: " << xref_offset << "\n\n";
 
     PDFDocument pdf_doc;

@@ -11,7 +11,6 @@
 #include "pdf-objects.hpp"
 #include "pdf-document.hpp"
 
-#define XREF_OFFSET_ERROR 0
 #define LOOKBACK 4096 // 4kb of data
 
 class Parser{
@@ -22,7 +21,6 @@ private:
 public:
     PDFDocument parsePDF(const std::string &path);
 
-    
 };
 
 #endif
