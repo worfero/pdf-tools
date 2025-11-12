@@ -9,7 +9,7 @@
 class PDFDocument {
 private:
     X_Ref_Table xref_table;
-    //Trailer trailer;
+    Trailer trailer;
 
 public:
     PDFDocument() = default;
@@ -17,6 +17,9 @@ public:
     // getters
     X_Ref_Table &get_xref_table();
     const X_Ref_Table &get_xref_table() const;
+
+    Trailer &get_trailer();
+    const Trailer &get_trailer() const;
 };
 
 #endif

@@ -7,3 +7,11 @@ X_Ref_Table &PDFDocument::get_xref_table() {
 const X_Ref_Table &PDFDocument::get_xref_table() const {
     return xref_table;
 };
+
+Trailer &PDFDocument::get_trailer() {
+    return trailer;
+};
+
+const Trailer &PDFDocument::get_trailer() const {
+    return trailer;
+};

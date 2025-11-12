@@ -8,7 +8,7 @@ CFLAGS = -Wall -I$(INCLUDE_DIR)
 SRCS = $(wildcard $(SRC_DIR)/*.cpp)
 OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
-TARGET = $(OBJ_DIR)/pdf-tools
+TARGET = $(OBJ_DIR)/pdf-lib
 
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
