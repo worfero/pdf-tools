@@ -5,6 +5,15 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include <memory>
+
+struct Object {
+    uint32_t id;
+    uint16_t gen;
+    uint64_t offset;
+    std::string content;
+    virtual ~Object() = default;
+};
 
 struct X_Ref_Entry {
     uint64_t offset;
@@ -12,7 +21,7 @@ struct X_Ref_Entry {
     char inUse;
 };
 
-struct X_Ref_Table_Instance {
+struct X_Ref_Table {
     uint16_t first_entry;
     size_t count;
     std::vector<X_Ref_Entry> entries;
@@ -20,22 +29,22 @@ struct X_Ref_Table_Instance {
     void add_entry(const X_Ref_Entry &entry) { entries.push_back(entry); }
 };
 
-struct X_Ref_Table {
-    std::vector<X_Ref_Table_Instance> tables;
+struct X_Ref_Tables {
+    std::vector<X_Ref_Table> tables;
 
     size_t size() const { 
         size_t size = 0;
-        for(X_Ref_Table_Instance table : tables){
+        for(X_Ref_Table table : tables){
             size += table.entries.size();
         }
         return size;
     }
 
-    void add_table(X_Ref_Table_Instance &table) { tables.push_back(table); }
+    void add_table(X_Ref_Table &table) { tables.push_back(table); }
 
     void print_entries() {
         std::cout << "[" << "\n";
-        for(X_Ref_Table_Instance table : tables){
+        for(X_Ref_Table table : tables){
             std::cout << table.first_entry << " " << table.count << ":" << "\n";
             std::cout << "[" << "\n";
             for(X_Ref_Entry entry : table.entries){

@@ -42,8 +42,8 @@ void Parser::read_xref_table(std::ifstream &file, PDFDocument &pdf_doc, uint64_t
 
         first_entry = std::stoi(token);
         file >> count;
-        
-        X_Ref_Table_Instance xref_table;
+
+        X_Ref_Table xref_table;
         xref_table.first_entry = first_entry;
         xref_table.count = count;
 
@@ -57,7 +57,7 @@ void Parser::read_xref_table(std::ifstream &file, PDFDocument &pdf_doc, uint64_t
             };
             xref_table.add_entry(entry);
         }
-        pdf_doc.get_xref_table().add_table(xref_table);
+        pdf_doc.get_xref_tables().add_table(xref_table);
     }
 }
 
@@ -126,6 +126,31 @@ void Parser::parse_trailer(std::ifstream& file, PDFDocument &pdf_doc){
     }
 }
 
+void Parser::parse_objects(std::ifstream& file, PDFDocument &pdf_doc){
+    for(auto &table : pdf_doc.get_xref_tables().tables){
+        for(auto &entry : table.entries){
+            if(entry.inUse == 'n'){
+                auto obj = std::make_unique<Object>();
+                obj->offset = entry.offset;
+
+                uint32_t id;
+                uint16_t gen;
+                std::string content, trash;
+
+                file.seekg(obj->offset);
+                file >> id >> gen >> trash;
+                content = stream_until_keyword(file, "endobj");
+
+                obj->id = id;
+                obj->gen = gen;
+                obj->content = content;
+
+                pdf_doc.get_objects().push_back(std::move(obj));
+            }
+        }
+    }
+}
+
 PDFDocument Parser::parsePDF(const std::string &path){
     std::ifstream file(path, std::ios::binary);
     if (!file) {
@@ -143,6 +168,8 @@ PDFDocument Parser::parsePDF(const std::string &path){
     read_xref_table(file, pdf_doc, xref_offset);
 
     parse_trailer(file, pdf_doc);
+
+    parse_objects(file, pdf_doc);
 
     return pdf_doc;
 }

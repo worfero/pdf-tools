@@ -8,15 +8,21 @@
 
 class PDFDocument {
 private:
-    X_Ref_Table xref_table;
+    X_Ref_Tables xref_tables;
     Trailer trailer;
+    std::vector<std::unique_ptr<Object>> objects;
 
 public:
     PDFDocument() = default;
 
+    void print_objects();
+
     // getters
-    X_Ref_Table &get_xref_table();
-    const X_Ref_Table &get_xref_table() const;
+    std::vector<std::unique_ptr<Object>> &get_objects();
+    const std::vector<std::unique_ptr<Object>> &get_objects() const;
+
+    X_Ref_Tables &get_xref_tables();
+    const X_Ref_Tables &get_xref_tables() const;
 
     Trailer &get_trailer();
     const Trailer &get_trailer() const;

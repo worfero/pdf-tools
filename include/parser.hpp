@@ -9,8 +9,10 @@
 #include <sstream>
 #include <cstring>
 #include <cstdint>
+
 #include "pdf-objects.hpp"
 #include "pdf-document.hpp"
+#include "utils.hpp"
 
 #define LOOKBACK 4096 // 4kb of data
 
@@ -21,7 +23,10 @@ private:
     void read_xref_table(std::ifstream &file, PDFDocument &pdf_doc, uint64_t xref_offset);
 
     // trailer methods
-    void parse_trailer(std::ifstream& file, PDFDocument &pdf_doc);
+    void parse_trailer(std::ifstream &file, PDFDocument &pdf_doc);
+
+    // object methods
+    void parse_objects(std::ifstream &file, PDFDocument &pdf_doc);
     
 public:
     PDFDocument parsePDF(const std::string &path);
