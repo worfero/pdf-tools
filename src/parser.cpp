@@ -33,20 +33,31 @@ void Parser::read_xref_table(std::ifstream &file, PDFDocument &pdf_doc, uint64_t
     file >> token;
     if(token != "xref") throw std::runtime_error("Error: xref keyword not found."); // make sure the xref table is there
 
-    int first_entry, count;
-    file >> first_entry >> count; // get the first entry index and the number of entries
+    while(1){
+        int first_entry, count;
+        file >> token;
+        if(!isdigit(token[0])){
+            break;
+        }
 
-    std::vector<X_Ref_Entry> xref_table(count); // allocate a vector with the number of entries size
+        first_entry = std::stoi(token);
+        file >> count;
+        
+        X_Ref_Table_Instance xref_table;
+        xref_table.first_entry = first_entry;
+        xref_table.count = count;
 
-    for(int i = 0; i < count; i++){
-        std::string offset_str, gen_str, flag;
-        file >> offset_str >> gen_str >> flag;
-        X_Ref_Entry entry = {
-            static_cast<uint64_t>(std::stoull(offset_str)),
-            static_cast<uint16_t>(std::stoi(gen_str)),
-            flag[0]
-        };
-        pdf_doc.get_xref_table().add_entry(entry);
+        for(int i = 0; i < count; i++){
+            std::string offset_str, gen_str, flag;
+            file >> offset_str >> gen_str >> flag;
+            X_Ref_Entry entry = {
+                static_cast<uint64_t>(std::stoull(offset_str)),
+                static_cast<uint16_t>(std::stoi(gen_str)),
+                flag[0]
+            };
+            xref_table.add_entry(entry);
+        }
+        pdf_doc.get_xref_table().add_table(xref_table);
     }
 }
 
