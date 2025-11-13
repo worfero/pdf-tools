@@ -8,7 +8,7 @@ void Parser::parse_header(std::ifstream &file, PDFDocument &pdf_doc){
 
     file >> token;
     while(token.find('%') == 0){
-        offset = file.tellg();
+        offset = static_cast<uint64_t>(file.tellg());
         pdf_doc.get_header().set(token, offset);
         file >> token;
     }
@@ -48,7 +48,7 @@ void Parser::read_xref_table(std::ifstream &file, PDFDocument &pdf_doc, uint64_t
     if(token != "xref") throw std::runtime_error("Error: xref keyword not found."); // make sure the xref table is there
 
     while(1){
-        int first_entry, count;
+        uint32_t first_entry, count;
         file >> token;
         if(!isdigit(token[0])){
             break;
@@ -61,7 +61,7 @@ void Parser::read_xref_table(std::ifstream &file, PDFDocument &pdf_doc, uint64_t
         xref_table.first_entry = first_entry;
         xref_table.count = count;
 
-        for(int i = 0; i < count; i++){
+        for(uint32_t i = 0; i < count; i++){
             std::string offset_str, gen_str, flag;
             file >> offset_str >> gen_str >> flag;
             X_Ref_Entry entry = {
@@ -143,24 +143,35 @@ void Parser::parse_trailer(std::ifstream& file, PDFDocument &pdf_doc){
 void Parser::parse_objects(std::ifstream& file, PDFDocument &pdf_doc){
     for(auto &table : pdf_doc.get_xref_tables().tables){
         for(auto &entry : table.entries){
-            if(entry.inUse == 'n'){
-                auto obj = std::make_unique<Object>();
-                obj->offset = entry.offset;
+            auto obj = std::make_unique<Object>();
+            
+            obj->xref_entry = &entry;
 
-                uint32_t id;
-                uint16_t gen;
-                std::string content, trash;
+            obj->offset = entry.offset;
 
+            uint32_t id;
+            uint16_t gen;
+            std::string content, trash;
+
+            obj->inUse = entry.inUse;
+
+            if(obj->inUse == 'n'){
                 file.seekg(obj->offset);
                 file >> id >> gen >> trash;
-                content = stream_until_keyword(file, "endobj");
-
+                
                 obj->id = id;
                 obj->gen = gen;
+                content = stream_until_keyword(file, "endobj");
                 obj->content = content;
-
-                pdf_doc.get_objects().push_back(std::move(obj));
             }
+            else{
+                obj->offset = 0;
+                obj->id = 0;
+                obj->gen = entry.generation;
+                obj->content.clear();
+            }
+
+            pdf_doc.get_objects().push_back(std::move(obj));
         }
     }
 }

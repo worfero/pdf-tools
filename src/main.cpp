@@ -1,24 +1,15 @@
 #include <iostream>
 #include "parser.hpp"
 #include "pdf-document.hpp"
+#include "build-pdf.hpp"
 
 int main(){
     Parser parser;
     PDFDocument pdf_doc;
 
-    pdf_doc = parser.parsePDF("./pdfs/newpdf.pdf");
+    pdf_doc = parser.parsePDF("./pdfs/Condominio 10_2025.pdf");
 
-    std::cout << "Header: " << "\n";
-    pdf_doc.get_header().print_header();
-
-    std::cout << "\n" << "X-Ref Table: " << "\n";
-    pdf_doc.get_xref_tables().print_entries();
-
-    std::cout << "\n" << "Trailer: " << "\n";
-    pdf_doc.get_trailer().print_dict();
-
-    std::cout << "\n" << "Objects: " << "\n";
-    pdf_doc.print_objects();
+    build_pdf(pdf_doc, "./pdfs/copy.pdf");
 
     return 0;
 }

@@ -2,10 +2,12 @@
 
 void PDFDocument::print_objects(){
     for(auto &obj : objects){
-        std::cout << "[" << "\n";
-        std::cout << obj->id << " " << obj->gen << " obj";
-        std::cout << obj->content;
-        std::cout << "]" << "\n\n";
+        if(obj->inUse == 'n'){
+            std::cout << "[" << "\n";
+            std::cout << obj->id << " " << obj->gen << " obj";
+            std::cout << obj->content;
+            std::cout << "]" << "\n\n";
+        }
     }
 };
 

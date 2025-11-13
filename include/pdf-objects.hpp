@@ -27,14 +27,6 @@ struct Header {
     }
 };
 
-struct Object {
-    uint32_t id;
-    uint16_t gen;
-    uint64_t offset;
-    std::string content;
-    virtual ~Object() = default;
-};
-
 struct X_Ref_Entry {
     uint64_t offset;
     uint16_t generation;
@@ -74,6 +66,18 @@ struct X_Ref_Tables {
         }
         std::cout << "]" << "\n";
     }
+};
+
+struct Object {
+    char inUse;
+    uint32_t id;
+    uint16_t gen;
+    uint64_t offset;
+    std::string content;
+
+    X_Ref_Entry *xref_entry;
+
+    virtual ~Object() = default;
 };
 
 struct Trailer {

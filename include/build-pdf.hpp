@@ -1,9 +1,9 @@
-#ifndef WRITE_PDF_H
-#define WRITE_PDF_H
+#ifndef BUILD_PDF_H
+#define BUILD_PDF_H
 
 #include <iostream>
 //#include <vector>
-//#include <iomanip>
+#include <iomanip>
 #include <fstream>
 #include <string>
 //#include <sstream>
@@ -14,6 +14,6 @@
 #include "pdf-document.hpp"
 //#include "utils.hpp"
 
-void write_pdf(PDFDocument pdf_doc, const std::string& path);
+void build_pdf(PDFDocument &pdf_doc, const std::string& path);
 
 #endif
