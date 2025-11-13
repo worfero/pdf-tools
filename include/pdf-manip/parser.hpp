@@ -12,7 +12,7 @@
 
 #include "pdf-objects.hpp"
 #include "pdf-document.hpp"
-#include "utils.hpp"
+#include "./utils/utils.hpp"
 
 #define LOOKBACK 4096 // 4kb of data
 

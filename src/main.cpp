@@ -1,13 +1,13 @@
 #include <iostream>
-#include "parser.hpp"
-#include "pdf-document.hpp"
-#include "build-pdf.hpp"
+#include "pdf-manip/parser.hpp"
+#include "pdf-manip/pdf-document.hpp"
+#include "pdf-manip/build-pdf.hpp"
 
 int main(){
     Parser parser;
     PDFDocument pdf_doc;
 
-    pdf_doc = parser.parsePDF("./pdfs/Condominio 10_2025.pdf");
+    pdf_doc = parser.parsePDF("./pdfs/newpdf.pdf");
 
     build_pdf(pdf_doc, "./pdfs/copy.pdf");
 
