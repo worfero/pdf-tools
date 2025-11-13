@@ -2,18 +2,19 @@
 #define BUILD_PDF_H
 
 #include <iostream>
-//#include <vector>
 #include <iomanip>
 #include <fstream>
 #include <string>
-//#include <sstream>
-//#include <cstring>
-//#include <cstdint>
-//
-//#include "pdf-objects.hpp"
-#include "pdf-document.hpp"
-//#include "utils.hpp"
 
-void build_pdf(PDFDocument &pdf_doc, const std::string& path);
+#include "pdf-document.hpp"
+
+#define CURRENT_OFFSET static_cast<uint64_t>(file.tellp())
+
+class Builder{
+private:
+
+public:
+    void build_pdf(PDFDocument &pdf_doc, const std::string &path);
+};
 
 #endif

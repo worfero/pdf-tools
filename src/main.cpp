@@ -1,15 +1,10 @@
 #include <iostream>
-#include "pdf-manip/parser.hpp"
-#include "pdf-manip/pdf-document.hpp"
-#include "pdf-manip/build-pdf.hpp"
+#include "pdf-tools.hpp"
 
 int main(){
-    Parser parser;
-    PDFDocument pdf_doc;
+    PDFTools tools;
 
-    pdf_doc = parser.parsePDF("./pdfs/newpdf.pdf");
-
-    build_pdf(pdf_doc, "./pdfs/copy.pdf");
+    tools.copyPDF("./pdfs/newpdf.pdf", "./pdfs/copy.pdf");
 
     return 0;
 }

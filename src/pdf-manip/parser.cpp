@@ -26,7 +26,7 @@ uint64_t Parser::find_xref_offset(std::ifstream &file){
     file.seekg(file_size - read_size, std::ios::beg); // moves the pointer 4kb before the end of the file
     file.read(buffer.data(), read_size); // effectively read the last 4kb of the file
 
-    for(ssize_t i = read_size - 9; i >= 0; --i){ // "startxref" is 9 characters, so the start index must be moved 9 bytes backwards
+    for(size_t i = read_size - 9; i >= 0; --i){ // "startxref" is 9 characters, so the start index must be moved 9 bytes backwards
         if(std::memcmp(buffer.data() + i, "startxref", 9) == 0){ // compares the current 9 bytes of the buffer with "startxref"
             std::string num; // gets the xref-table address as a string
             for(size_t j = i + 9; j < read_size; ++j){

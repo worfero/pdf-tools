@@ -1,8 +1,6 @@
 #include "pdf-manip/build-pdf.hpp"
 
-#define CURRENT_OFFSET static_cast<uint64_t>(file.tellp())
-
-void build_pdf(PDFDocument &pdf_doc, const std::string &path){
+void Builder::build_pdf(PDFDocument &pdf_doc, const std::string &path){
     std::ofstream file(path, std::ios::binary);
     if (!file) {
         throw std::runtime_error("Error: cannot open file");
