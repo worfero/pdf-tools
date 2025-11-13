@@ -11,6 +11,14 @@ void PDFDocument::print_objects(){
 
 //getters
 
+Header &PDFDocument::get_header() {
+    return header;
+};
+
+const Header &PDFDocument::get_header() const {
+    return header;
+};
+
 X_Ref_Tables &PDFDocument::get_xref_tables() {
     return xref_tables;
 };

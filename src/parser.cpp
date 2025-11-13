@@ -1,5 +1,19 @@
 #include "parser.hpp"
 
+void Parser::parse_header(std::ifstream &file, PDFDocument &pdf_doc){
+    file.seekg(0, std::ios::beg);
+    
+    std::string token;
+    uint64_t offset;
+
+    file >> token;
+    while(token.find('%') == 0){
+        offset = file.tellg();
+        pdf_doc.get_header().set(token, offset);
+        file >> token;
+    }
+}
+
 uint64_t Parser::find_xref_offset(std::ifstream &file){
     file.seekg(0, std::ios::end); // move the stream pointer to the end of the file
     std::streampos file_stream_size = file.tellg(); // get the current position of the pointer as a byte size in relation to the full size
@@ -164,6 +178,8 @@ PDFDocument Parser::parsePDF(const std::string &path){
     std::cout << "xref table offset: " << xref_offset << "\n\n";
 
     PDFDocument pdf_doc;
+
+    parse_header(file, pdf_doc);
 
     read_xref_table(file, pdf_doc, xref_offset);
 

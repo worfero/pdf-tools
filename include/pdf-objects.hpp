@@ -7,6 +7,26 @@
 #include <iostream>
 #include <memory>
 
+struct Header {
+    std::map<std::string, uint64_t> data;
+
+    void set(const std::string &key, const uint64_t &value) { data[key] = value; }
+
+    size_t size() const { 
+        size_t size = 0;
+        for(auto entry : data){
+            size ++;
+        }
+        return size;
+    }
+
+    void print_header(){
+        for(auto [ text, offset ] : data){
+            std::cout << text << "\n";
+        }
+    }
+};
+
 struct Object {
     uint32_t id;
     uint16_t gen;

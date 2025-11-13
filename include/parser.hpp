@@ -18,8 +18,10 @@
 
 class Parser{
 private:
+    void parse_header(std::ifstream &file, PDFDocument &pdf_doc);
+
     // xref table methods
-    uint64_t find_xref_offset(std::ifstream& file);
+    uint64_t find_xref_offset(std::ifstream &file);
     void read_xref_table(std::ifstream &file, PDFDocument &pdf_doc, uint64_t xref_offset);
 
     // trailer methods

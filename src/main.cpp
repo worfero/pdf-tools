@@ -8,7 +8,10 @@ int main(){
 
     pdf_doc = parser.parsePDF("./pdfs/newpdf.pdf");
 
-    std::cout << "X-Ref Table: " << "\n";
+    std::cout << "Header: " << "\n";
+    pdf_doc.get_header().print_header();
+
+    std::cout << "\n" << "X-Ref Table: " << "\n";
     pdf_doc.get_xref_tables().print_entries();
 
     std::cout << "\n" << "Trailer: " << "\n";
