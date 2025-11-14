@@ -125,7 +125,7 @@ void Parser::parse_trailer(std::ifstream& file, PDFDocument &pdf_doc){
 
     std::map<std::string, std::string> parsed_dict = parse_dict(dict_buffer);
 
-    pdf_doc.get_trailer().replace(parsed_dict);
+    pdf_doc.get_trailer().dict.replace(parsed_dict);
 
     if(pdf_doc.get_trailer().get_root_id() == 0) throw std::runtime_error("Error: '/Root' object reference not found.");
 }

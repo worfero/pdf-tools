@@ -102,15 +102,11 @@ struct RootObject : public Object {
 };
 
 struct Trailer {
-    std::map<std::string, std::string> dict;
-
-    void set(const std::string &key, const std::string &value) { dict[key] = value; }
-
-    void replace(std::map<std::string, std::string> new_dict) { dict = new_dict; }
+    PDFDict dict;
 
     uint32_t get_root_id(){
-        auto root_pair = dict.find("/Root");
-        if (root_pair != dict.end()) {
+        auto root_pair = dict.pdf_dict.find("/Root");
+        if (root_pair != dict.pdf_dict.end()) {
             std::istringstream iss(root_pair->second);
             uint32_t id;
             iss >> id;
@@ -118,14 +114,6 @@ struct Trailer {
         }
         return 0;
     };
-
-    void print_dict(){
-        std::cout << "[" << "\n";
-        for(const auto& [k, v] : dict){
-            std::cout << k << ", " << v << "\n";
-        }
-        std::cout << "]" << "\n";
-    }
 };
 
 #endif
