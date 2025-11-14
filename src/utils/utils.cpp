@@ -30,7 +30,10 @@ std::map<std::string, std::string> parse_dict(std::string dict_buffer){
     std::string token, key, val;
     while(!dict_stream.eof()){
         std::getline(dict_stream, token, ' ');
-        key = "/" + token;
+        if(token[0] != '/'){
+            key = "/";
+        }
+        key += token;
 
         std::getline(dict_stream, token, '/');
         while(!token.empty() && std::isspace(static_cast<unsigned char>(token.back()))){

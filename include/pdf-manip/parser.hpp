@@ -25,6 +25,7 @@ private:
     void read_xref_table(std::ifstream &file, PDFDocument &pdf_doc, uint64_t xref_offset);
 
     // trailer methods
+    uint64_t find_trailer_offset(std::ifstream& file);
     void parse_trailer(std::ifstream &file, PDFDocument &pdf_doc);
 
     // object methods

@@ -75,7 +75,7 @@ void Parser::read_xref_table(std::ifstream &file, PDFDocument &pdf_doc, uint64_t
     }
 }
 
-void Parser::parse_trailer(std::ifstream& file, PDFDocument &pdf_doc){
+uint64_t Parser::find_trailer_offset(std::ifstream& file){
     file.seekg(0, std::ios::end); // move the stream pointer to the end of the file
     std::streampos file_stream_size = file.tellg(); // get the current position of the pointer as a byte size in relation to the full size
     
@@ -87,12 +87,10 @@ void Parser::parse_trailer(std::ifstream& file, PDFDocument &pdf_doc){
     file.seekg(file_size - read_size, std::ios::beg); // moves the pointer 4kb before the end of the file
     file.read(buffer.data(), read_size); // effectively read the last 4kb of the file
 
-    // trailer offsets relative to the ending 4kb of the file
+    // trailer offset relative to the ending 4kb of the file
     size_t trailer_offset = 0;
-    size_t dict_offset = 0;
-    size_t dict_end = 0;
 
-    for(size_t i = read_size - 7; i >= 0; --i){ // "trailer" is 7 characters, so the start index must be moved 9 bytes backwards
+    for(size_t i = read_size - 7; i >= 0; i--){ // "trailer" is 7 characters, so the start index must be moved 7 bytes backwards
         if(std::memcmp(buffer.data() + i, "trailer", 7) == 0){ // compares the last 7 bytes of the buffer with "trailer"
             trailer_offset = i;
             break;
@@ -100,30 +98,37 @@ void Parser::parse_trailer(std::ifstream& file, PDFDocument &pdf_doc){
     }
     if(trailer_offset == 0) throw std::runtime_error("Error: trailer not found.");
 
-    for(size_t i = trailer_offset + 7; i <= file_size; i++){ // check for trailer dict opening brackets
-        if(std::memcmp(buffer.data() + i, "<<", 2) == 0){
-            dict_offset = i + 2;
-        }
-        if(dict_offset != 0){
-            if(std::memcmp(buffer.data() + i, "/", 1) == 0){ // sets the pointer to the first trailer object
-                dict_offset = i + 1;
-                break;
+    return static_cast<uint64_t>(trailer_offset);
+}
+
+void Parser::parse_trailer(std::ifstream& file, PDFDocument &pdf_doc){
+    uint64_t trailer_offset = find_trailer_offset(file);
+
+    file.seekg(trailer_offset + 7);
+
+    std::string trailer_content = stream_until_keyword(file, "startxref");
+
+    bool has_opn_brk = false;
+    bool has_cls_brk = false;
+    size_t i = 0;
+    while (i < trailer_content.size()) {
+        if((isspace(trailer_content[i]) && i == 0) || (trailer_content[i] == '<' || trailer_content[i] == '>')){
+            if(trailer_content[i] == '<' && trailer_content[i+1] == '<'){
+                has_opn_brk = true;
             }
+            if(trailer_content[i] == '>' && trailer_content[i+1] == '>'){
+                has_cls_brk = true;
+            }
+            trailer_content.erase(i, 1);
+        }
+        else{
+            i++;
         }
     }
-    if(dict_offset == 0) throw std::runtime_error("Error: missing '<<' in the trailer section.");
+    if(!has_opn_brk) throw std::runtime_error("Error: missing '<<' in the trailer section.");
+    if(!has_cls_brk) throw std::runtime_error("Error: missing '>>' in the trailer section.");
 
-    for(size_t i = dict_offset; i <= file_size; i++){ // check for trailer dict colsing brackets
-        if(std::memcmp(buffer.data() + i, ">>", 2) == 0){
-            dict_end = i;
-            break;
-        }
-    }
-    if(dict_end == 0) throw std::runtime_error("Error: missing '>>' in the trailer section.");
-
-    std::string dict_buffer(buffer.begin() + dict_offset, buffer.begin() + dict_end);
-
-    std::map<std::string, std::string> parsed_dict = parse_dict(dict_buffer);
+    std::map<std::string, std::string> parsed_dict = parse_dict(trailer_content);
 
     pdf_doc.get_trailer().dict.replace(parsed_dict);
 
