@@ -7,6 +7,22 @@
 #include <iostream>
 #include <memory>
 
+struct PDFDict {
+    std::map<std::string, std::string> pdf_dict;
+
+    void set(const std::string &key, const std::string &value) { pdf_dict[key] = value; }
+
+    void replace(std::map<std::string, std::string> new_dict) { pdf_dict = new_dict; }
+
+    void print_dict(){
+        std::cout << "[" << "\n";
+        for(const auto& [k, v] : pdf_dict){
+            std::cout << k << ", " << v << "\n";
+        }
+        std::cout << "]" << "\n";
+    }
+};
+
 struct Header {
     std::map<std::string, uint64_t> data;
 
@@ -80,10 +96,28 @@ struct Object {
     virtual ~Object() = default;
 };
 
+struct RootObject : public Object {
+    std::string pages_ref;
+    PDFDict dict;
+};
+
 struct Trailer {
     std::map<std::string, std::string> dict;
 
     void set(const std::string &key, const std::string &value) { dict[key] = value; }
+
+    void replace(std::map<std::string, std::string> new_dict) { dict = new_dict; }
+
+    uint32_t get_root_id(){
+        auto root_pair = dict.find("/Root");
+        if (root_pair != dict.end()) {
+            std::istringstream iss(root_pair->second);
+            uint32_t id;
+            iss >> id;
+            return id;
+        }
+        return 0;
+    };
 
     void print_dict(){
         std::cout << "[" << "\n";

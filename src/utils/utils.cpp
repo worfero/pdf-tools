@@ -22,3 +22,23 @@ std::string stream_until_keyword(std::ifstream &file, std::string keyword){
 
     return content;
 }
+
+std::map<std::string, std::string> parse_dict(std::string dict_buffer){
+    std::istringstream dict_stream(dict_buffer);
+    std::map<std::string, std::string> dict;
+    
+    std::string token, key, val;
+    while(!dict_stream.eof()){
+        std::getline(dict_stream, token, ' ');
+        key = "/" + token;
+
+        std::getline(dict_stream, token, '/');
+        while(!token.empty() && std::isspace(static_cast<unsigned char>(token.back()))){
+            token.pop_back();
+        }
+        val = token;
+
+        dict[key] = val;
+    }
+    return dict;
+}

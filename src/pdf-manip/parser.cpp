@@ -113,7 +113,7 @@ void Parser::parse_trailer(std::ifstream& file, PDFDocument &pdf_doc){
     }
     if(dict_offset == 0) throw std::runtime_error("Error: missing '<<' in the trailer section.");
 
-    for(size_t i = dict_offset; i <= file_size; i++){ // check for trailer dict opening brackets
+    for(size_t i = dict_offset; i <= file_size; i++){ // check for trailer dict colsing brackets
         if(std::memcmp(buffer.data() + i, ">>", 2) == 0){
             dict_end = i;
             break;
@@ -122,54 +122,66 @@ void Parser::parse_trailer(std::ifstream& file, PDFDocument &pdf_doc){
     if(dict_end == 0) throw std::runtime_error("Error: missing '>>' in the trailer section.");
 
     std::string dict_buffer(buffer.begin() + dict_offset, buffer.begin() + dict_end);
-    std::istringstream dict_stream(dict_buffer);
 
-    std::string token, key, val;
+    std::map<std::string, std::string> parsed_dict = parse_dict(dict_buffer);
 
-    while(!dict_stream.eof()){
-        std::getline(dict_stream, token, ' ');
-        key = "/" + token;
+    pdf_doc.get_trailer().replace(parsed_dict);
 
-        std::getline(dict_stream, token, '/');
-        while(!token.empty() && std::isspace(static_cast<unsigned char>(token.back()))){
-            token.pop_back();
-        }
-        val = token;
-
-        pdf_doc.get_trailer().set(key, val);
-    }
+    if(pdf_doc.get_trailer().get_root_id() == 0) throw std::runtime_error("Error: '/Root' object reference not found.");
 }
 
 void Parser::parse_objects(std::ifstream& file, PDFDocument &pdf_doc){
+    uint32_t rootID = pdf_doc.get_trailer().get_root_id();
+
     for(auto &table : pdf_doc.get_xref_tables().tables){
         for(auto &entry : table.entries){
-            auto obj = std::make_unique<Object>();
-            
-            obj->xref_entry = &entry;
-
-            obj->offset = entry.offset;
+            std::unique_ptr<Object> obj;
 
             uint32_t id;
             uint16_t gen;
             std::string content, trash;
 
-            obj->inUse = entry.inUse;
-
-            if(obj->inUse == 'n'){
-                file.seekg(obj->offset);
+            if(entry.inUse == 'n'){
+                file.seekg(entry.offset);
                 file >> id >> gen >> trash;
+                if(id == rootID){
+                    obj = std::make_unique<RootObject>();
+                }
+                else{
+                    obj = std::make_unique<Object>();
+                }
                 
+                obj->offset = entry.offset;
                 obj->id = id;
                 obj->gen = gen;
                 content = stream_until_keyword(file, "endobj");
                 obj->content = content;
+
+                if(id == rootID){
+                    RootObject* root = dynamic_cast<RootObject*>(obj.get());
+                    size_t i = 0;
+                    while (i < root->content.size()) {
+                        if((isspace(root->content[i]) && i == 0) || (root->content[i] == '<' || root->content[i] == '>')){
+                            root->content.erase(i, 1);
+                        }
+                        else{
+                            i++;
+                        }
+                    }
+                    std::map<std::string, std::string> parsed_dict = parse_dict(root->content);
+                    root->dict.replace(parsed_dict);
+                }
             }
             else{
+                obj = std::make_unique<Object>();
                 obj->offset = 0;
                 obj->id = 0;
                 obj->gen = entry.generation;
                 obj->content.clear();
             }
+
+            obj->inUse = entry.inUse;
+            obj->xref_entry = &entry;
 
             pdf_doc.get_objects().push_back(std::move(obj));
         }
