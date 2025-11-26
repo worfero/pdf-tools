@@ -30,7 +30,7 @@ void Builder::build_pdf(PDFDocument &pdf_doc, const std::string &path){
     }
 
     file << "trailer\n<< ";
-    for(auto &[key, value] : pdf_doc.get_trailer().dict){
+    for(auto &[key, value] : pdf_doc.get_trailer().dict.pdf_dict){
         file << key << " " << value << "\n";
     }
     file << ">>\n";

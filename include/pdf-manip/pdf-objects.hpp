@@ -6,13 +6,17 @@
 #include <string>
 #include <iostream>
 #include <memory>
+#include <sstream>
+#include <vector>
 
 struct PDFDict {
     std::map<std::string, std::string> pdf_dict;
 
     void set(const std::string &key, const std::string &value) { pdf_dict[key] = value; }
 
-    void replace(std::map<std::string, std::string> new_dict) { pdf_dict = new_dict; }
+    void replace(std::map<std::string, std::string> &new_dict) {
+        pdf_dict = new_dict;
+    }
 
     void print_dict(){
         std::cout << "[" << "\n";
